@@ -1,0 +1,15 @@
+target/
+project/project/
+.bsp/
+.bloop/
+.idea/
+.metals/
+node_modules/
+logs/
+run/
+data/
+.env
+*.log
+test-results/
+playwright-report/
+RUNNING_PID

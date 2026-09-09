@@ -1,0 +1,38 @@
+name: Verify Play SCADA
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: sbt -batch test stage
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Start staged application
+        env:
+          APPLICATION_SECRET: ci-only-not-for-deployment-445f5560d8904b7bbc3e20195fc7edbb
+        run: |
+          target/universal/stage/bin/scada-webmcp -Dhttp.address=127.0.0.1 -Dhttp.port=9000 > /tmp/scada-ci.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:9000/api/scada/snapshot | python3 -c 'import json,sys; assert json.load(sys.stdin)["connected"]'; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/scada-ci.log
+          exit 1
+      - run: npm run test:browser
+      - run: npm run test:mcp

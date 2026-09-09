@@ -1,0 +1,65 @@
+@(tools: java.util.List[playwebmcp.Tool])(implicit request: play.api.mvc.RequestHeader)
+@import playwebmcp.javadsl.WebMcp
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Supervision · Play SCADA</title>
+    <link rel="stylesheet" href="@controllers.routes.Assets.versioned("stylesheets/scada.css")">
+    <script defer src="@controllers.routes.Assets.versioned("lib/play-webmcp/play-webmcp.global.js")"></script>
+    <script defer src="@controllers.routes.Assets.versioned("lib/play-scada/play-scada.js")"></script>
+    <script defer src="@controllers.routes.Assets.versioned("javascripts/scada.js")"></script>
+</head>
+<body data-scada-base="@controllers.routes.HomeController.index()">
+    <div id="csrf-fields" hidden>@helper.CSRF.formField</div>
+    <header class="app-header">
+        <a class="brand" href="@controllers.routes.HomeController.index()" aria-label="Play SCADA, accueil"><span class="brand-mark" aria-hidden="true">S</span><span>play<span class="brand-divider">/</span><strong>scada</strong></span></a>
+        <span class="header-caption">SUPERVISION INDUSTRIELLE</span>
+        <div class="connection-group"><span id="mode-badge" class="badge">Connexion…</span><span id="connection-status" class="connection" role="status">Initialisation</span></div>
+    </header>
+    <main>
+        <div class="page-heading"><div><p class="eyebrow">ATELIER / LIGNE 01</p><h1>Supervision de la cuve</h1><p class="lede">Mesures en direct et commandes des équipements.</p></div><div class="update-time"><span class="live-dot" aria-hidden="true"></span><span id="last-update">En attente des premières mesures</span></div></div>
+        <p id="page-notice" class="notice" role="alert" hidden></p>
+        <noscript><p class="notice">Activez JavaScript pour afficher les mesures et utiliser les commandes de cette démonstration.</p></noscript>
+        <section aria-label="Mesures de l’atelier" id="metrics" class="metrics"><div class="metric placeholder">Chargement des mesures…</div></section>
+        <div class="workspace-grid">
+            <section class="panel process-panel" aria-labelledby="process-title">
+                <div class="panel-header"><div><p class="eyebrow">VUE DU PROCÉDÉ</p><h2 id="process-title">Cuve de préparation</h2></div><span class="subtle-label">T-101</span></div>
+                <div class="process-diagram">
+                    <svg viewBox="0 0 660 330" role="img" aria-labelledby="diagram-title diagram-description">
+                        <title id="diagram-title">Cuve, pompe d’alimentation et mesure de température</title>
+                        <desc id="diagram-description">Schéma de démonstration. Le remplissage dessiné est illustratif, sans mesure de niveau.</desc>
+                        <defs><pattern id="diagram-grid" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#dce5e5"/></pattern><clipPath id="tank-interior"><rect x="236" y="75" width="187" height="192" rx="20"/></clipPath><linearGradient id="water-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfdfdc"/><stop offset="1" stop-color="#e1efed"/></linearGradient></defs>
+                        <rect width="660" height="330" fill="url(#diagram-grid)"/>
+                        <path class="pipe" d="M44 227 H236 M424 226 H610"/>
+                        <path class="pipe-flow" d="M44 227 H236 M424 226 H610"/>
+                        <path d="m192 222 8 5-8 5m359-5 8 5-8 5" fill="none" stroke="#668382" stroke-width="2"/>
+                        <rect x="234" y="72" width="191" height="196" rx="22" fill="#fff" stroke="#668382" stroke-width="2"/>
+                        <g clip-path="url(#tank-interior)"><path d="M230 170 Q277 158 330 170 T430 170 V270 H230Z" fill="url(#water-fill)"/><path d="M235 170 Q282 158 330 170 T425 170" stroke="#6ea9a3" stroke-width="2" fill="none"/></g>
+                        <path d="M268 269v19m123-19v19m-75-217V48h29v23" fill="none" stroke="#668382" stroke-width="3"/>
+                        <text x="330" y="115" text-anchor="middle" class="svg-label">T-101</text>
+                        <text x="330" y="223" text-anchor="middle" class="svg-measure" data-scada-value="tank.temperature" data-scada-unit="°C">—</text>
+                        <text x="330" y="246" text-anchor="middle" class="svg-caption">TEMPÉRATURE</text>
+                        <g id="pump-symbol"><circle cx="124" cy="227" r="29" fill="#fff" stroke="#668382" stroke-width="2"/><path d="m113 212 26 15-26 15Z" fill="#dae8e6" stroke="#668382" stroke-width="2"/></g>
+                        <text x="124" y="281" text-anchor="middle" class="svg-label">P-101</text>
+                        <text x="124" y="301" text-anchor="middle" class="svg-caption" data-scada-value="pump.running">—</text>
+                        <path d="M426 122h51" fill="none" stroke="#668382" stroke-width="1.5" stroke-dasharray="4 4"/><rect x="478" y="98" width="129" height="52" rx="8" fill="#fff" stroke="#c9d8d6"/><text x="542" y="117" text-anchor="middle" class="svg-caption">CONSIGNE</text><text x="542" y="137" text-anchor="middle" class="svg-label" data-scada-value="tank.setpoint" data-scada-unit="°C">—</text>
+                    </svg>
+                </div>
+                <div class="diagram-footer"><span><span class="legend-dot" aria-hidden="true"></span>Valeurs issues du catalogue OPC UA</span><span>Schéma illustratif · niveau non mesuré</span></div>
+            </section>
+            <section class="panel command-panel" aria-labelledby="command-title"><div class="panel-header"><div><p class="eyebrow">CONDUITE</p><h2 id="command-title">Commandes</h2></div><span class="subtle-label">P-101 / T-101</span></div><p id="access-status" class="panel-description">Vérification des droits de commande…</p><div id="commands" class="commands"></div><p id="command-notice" class="command-notice" role="status" aria-live="polite"></p></section>
+        </div>
+        <div class="detail-grid">
+            <section class="panel" aria-labelledby="tags-title"><div class="panel-header"><div><p class="eyebrow">ACQUISITION</p><h2 id="tags-title">Variables & qualité</h2></div><span id="tag-count" class="subtle-label"></span></div><div class="table-scroll"><table><thead><tr><th scope="col">Variable</th><th scope="col">Valeur</th><th scope="col">Qualité</th><th scope="col">Horodatage source</th></tr></thead><tbody id="tag-rows"></tbody></table></div></section>
+            <section class="panel journal-panel" aria-labelledby="journal-title"><div class="panel-header"><div><p class="eyebrow">ACTIVITÉ DE LA PAGE</p><h2 id="journal-title">Journal des commandes</h2></div></div><ol id="command-log" class="command-log"><li class="empty-log">Les commandes exécutées depuis cette page apparaîtront ici.</li></ol></section>
+        </div>
+        <details class="panel assistant-panel" id="assistant-panel"><summary><span class="assistant-icon" aria-hidden="true">✳</span><span>Assistant de supervision <span id="assistant-status" class="subtle-label">Vérification…</span></span><span class="summary-arrow" aria-hidden="true">⌄</span></summary><div class="assistant-content"><p id="assistant-description">Interrogez l’assistant sur les valeurs et les équipements du catalogue.</p><form id="assistant-form"><label for="assistant-message">Votre question</label><div class="input-row"><input id="assistant-message" name="message" placeholder="Quel est l’état de la cuve ?" maxlength="4000" required><button type="submit" class="button">Envoyer</button></div></form><p id="assistant-answer" role="status" class="assistant-answer"></p></div></details>
+        <details class="session-panel"><summary>Accès opérateur</summary><div class="session-content"><p>Ouvrez une session avec le jeton opérateur configuré sur votre serveur.</p><form id="session-form"><label for="operator-token">Jeton opérateur</label><div class="input-row"><input id="operator-token" name="token" type="password" autocomplete="off" required><button type="submit" class="button button-secondary">Ouvrir la session</button><button type="button" class="button button-quiet" id="logout">Fermer la session</button></div></form><p id="session-status" role="status"></p></div></details>
+    </main>
+    <footer class="app-footer"><span>Play SCADA <span class="footer-dot">·</span> IHM Java / HTML</span><span id="webmcp-status" role="status">WebMCP : initialisation…</span></footer>
+    @for(tool <- tools.asScala) { @WebMcp.tool(tool) }
+</body>
+</html>

@@ -1,0 +1,14 @@
+GET     /                           controllers.HomeController.index(request: Request)
+GET     /api/scada/catalog           io.hackinvent.scada.play.ScadaController.catalog(request: Request)
+GET     /api/scada/snapshot          io.hackinvent.scada.play.ScadaController.snapshot(request: Request)
+GET     /api/scada/events            io.hackinvent.scada.play.ScadaController.events(request: Request)
+POST    /api/scada/commands/:id      io.hackinvent.scada.play.ScadaController.command(request: Request, id: String)
+POST    /api/scada/session           io.hackinvent.scada.play.ScadaController.login(request: Request)
+DELETE  /api/scada/session           io.hackinvent.scada.play.ScadaController.logout(request: Request)
+POST    /api/scada/assistant         io.hackinvent.scada.play.ScadaController.assistant(request: Request)
+# MCP uses its own Origin and authentication checks; remote clients do not carry browser CSRF tokens.
++ nocsrf
+POST    /mcp                        io.hackinvent.scada.play.McpController.handle(request: Request)
+GET     /mcp                        io.hackinvent.scada.play.McpController.unsupported(request: Request)
+DELETE  /mcp                        io.hackinvent.scada.play.McpController.unsupported(request: Request)
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

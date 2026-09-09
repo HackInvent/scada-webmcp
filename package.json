@@ -1,0 +1,16 @@
+{
+  "name": "play-scada-browser-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:browser": "node --test tests/browser.mjs",
+    "test:mcp": "node --test tests/mcp-client.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "@modelcontextprotocol/sdk": "1.30.0"
+  }
+}
