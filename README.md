@@ -1,56 +1,56 @@
 # Play SCADA + MCP + WebMCP
 
-Un noyau de supervision réutilisable en **Play Java 3.0.11 / Java 17+**, connecté à OPC UA. Le même catalogue de variables et de commandes alimente les vues HTML, le serveur MCP et les outils WebMCP des pages.
+A reusable supervision core built with **Play Java 3.0.11 / Java 17+**, connected to OPC UA. A shared tag and command catalog powers HTML views, the MCP server, and each page's WebMCP tools.
 
-L'intégration navigateur utilise le vrai module [`HackInvent/play-webmcp` 0.5.0](https://github.com/HackInvent/play-webmcp), téléchargé depuis sa branche Maven. Aucun code de ce module n'est recopié dans le projet.
+The browser integration uses [`HackInvent/play-webmcp` 0.5.0](https://github.com/HackInvent/play-webmcp), resolved from its Maven branch. The project depends on the published module rather than copying its source code.
 
-## Démarrer la démonstration
+## Run the demo
 
-Prérequis : JDK 17 ou 21 et sbt. Node.js 20+ n'est nécessaire que pour les tests navigateur/MCP.
+Requirements: JDK 17 or 21 and sbt. Node.js 20+ is only required for browser and MCP tests.
 
 ```bash
 ./scripts/dev.sh
 ```
 
-Ouvrir **http://127.0.0.1:9000**. Le simulateur OPC UA écoute sur `opc.tcp://127.0.0.1:12686/scada`. La démonstration est limitée à la machine locale par le script. Si Java 11 est la version par défaut :
+Open **http://127.0.0.1:9000**. The OPC UA simulator listens at `opc.tcp://127.0.0.1:12686/scada`. The script binds the demo to the local machine. If Java 11 is your default:
 
 ```bash
 SCADA_JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./scripts/dev.sh
 ```
 
-La page expose la température de cuve, la pompe et une consigne réglable entre 10 et 80 °C. Les boutons, formulaires et outils WebMCP passent par les mêmes services Java. Les valeurs viennent d'une **vraie connexion OPC UA** avec le simulateur, pas de réponses HTTP simulées.
+The page displays tank temperature, pump status, and a temperature setpoint adjustable from 10 to 80 °C. Buttons, forms, and WebMCP tools use the same Java services. Measurements come from a **real OPC UA connection** to the simulator.
 
-L'accès opérateur anonyme existe uniquement quand le simulateur est activé **et** que la requête HTTP provient de loopback. Un déploiement sur réseau requiert des jetons configurés. Le dessin du niveau de cuve est illustratif : aucune mesure de niveau n'est annoncée.
+Anonymous operator access is available only when the simulator is enabled **and** the HTTP request comes from a loopback address. Network deployments require configured authentication tokens. The tank level drawing is illustrative; the demo does not provide a level measurement.
 
 ## Modules
 
-| Module | Rôle |
+| Module | Responsibility |
 | --- | --- |
-| `modules/scada-core` | Modèle Java, catalogue, validation des commandes, état des valeurs et déduplication |
-| `modules/scada-opcua` | Client Eclipse Milo 1.1.6, abonnements/reconnexion, certificats et simulateur |
-| `modules/play-scada` | Services/contrôleurs Play, serveur MCP, client HTML/WebMCP, assistant OpenAI optionnel |
-| `app`, `conf`, `public` | Application IHM d'exemple, remplaçable par les vues de l'intégrateur |
+| `modules/scada-core` | Java model, catalog, command validation, tag state, and deduplication |
+| `modules/scada-opcua` | Eclipse Milo 1.1.6 client, subscriptions, reconnection, certificates, and simulator |
+| `modules/play-scada` | Play services and controllers, MCP server, HTML/WebMCP client, and optional OpenAI assistant |
+| `app`, `conf`, `public` | Example HMI application that integrators can replace with their own views |
 
-Le serveur MCP et le navigateur utilisent les mêmes identifiants métiers. Un identifiant de variable est associé à un `NodeId` OPC UA dans `conf/application.conf`. Les commandes désignent des variables explicitement configurées comme accessibles en écriture.
+The MCP server and browser share application-level identifiers. Each tag identifier maps to an OPC UA `NodeId` in `conf/application.conf`. Commands target tags explicitly configured as writable.
 
-## Construire une autre IHM
+## Build your own HMI
 
-Déclarer `scada.tags` et `scada.commands`, importer le module `play-scada`, monter ses contrôleurs et écrire ses vues Twirl. Le client navigateur réutilisable sait lier `data-scada-value` et `data-scada-command`, recevoir les mesures, fournir le jeton CSRF et enregistrer les outils via `play-webmcp`.
+Define `scada.tags` and `scada.commands`, import the `play-scada` module, mount its controllers, and write your Twirl views. The reusable browser client binds `data-scada-value` and `data-scada-command` elements, receives measurements, supplies the CSRF token, and registers tools through `play-webmcp`.
 
-Voir [le guide d'intégration](docs/integration.md). Le projet est actuellement distribué en sources ; `sbt 'core/publishLocal' 'opcua/publishLocal' 'playScada/publishLocal'` permet une consommation locale des trois artefacts. Aucune publication Maven publique du noyau SCADA n'est annoncée.
+See the [integration guide](docs/integration.md). The project is currently distributed as source; `sbt 'core/publishLocal' 'opcua/publishLocal' 'playScada/publishLocal'` publishes all three artifacts locally for use by other projects. The SCADA core is not currently published to a public Maven repository.
 
-## Serveur MCP
+## MCP server
 
-Endpoint : **`POST /mcp`**, transport **Streamable HTTP**, réponses JSON sans état de session.
+Endpoint: **`POST /mcp`**, using **Streamable HTTP** with stateless JSON responses.
 
-| Outil | Usage |
+| Tool | Purpose |
 | --- | --- |
-| `scada_list_tags` | Catalogue des variables, types et unités |
-| `scada_read_tags` | Lecture OPC UA, qualité et horodatages ; `ids` optionnel |
-| `scada_list_commands` | Catalogue des commandes et de leurs limites |
-| `scada_execute_command` | Commande configurée ; droit opérateur et identifiant de requête requis |
+| `scada_list_tags` | Tag catalog, data types, and units |
+| `scada_read_tags` | OPC UA readings, quality, and timestamps; optional `ids` filter |
+| `scada_list_commands` | Command catalog and limits |
+| `scada_execute_command` | Execute a configured command; requires operator permission and a request identifier |
 
-Exemple de configuration d'un client MCP acceptant un serveur HTTP :
+Example configuration for an MCP client that supports HTTP servers:
 
 ```json
 {
@@ -62,50 +62,50 @@ Exemple de configuration d'un client MCP acceptant un serveur HTTP :
 }
 ```
 
-Hors démonstration locale, fournir `Authorization: Bearer <jeton>` selon la syntaxe de votre client. Les lecteurs ne reçoivent pas l'outil d'exécution dans `tools/list` et un appel direct à celui-ci est refusé côté serveur.
+Outside the local demo, supply `Authorization: Bearer <token>` using your client's configuration format. Readers do not receive the execution tool in `tools/list`; direct calls to that tool are also rejected by the server.
 
-Les versions MCP prises en charge sont `2025-11-25`, `2025-06-18` et `2025-03-26`. L'initialisation négocie la version ; les requêtes suivantes peuvent inclure `MCP-Protocol-Version`. Le transport accepte `application/json` et `text/event-stream` dans `Accept` et utilise JSON pour les réponses. `GET /mcp` et `DELETE /mcp` retournent 405 car aucun flux SSE MCP ou état de session n'est proposé. Les notifications reçoivent 202. Aucun OAuth, serveur SSE historique, tâche différée ou ressource MCP n'est revendiqué.
+Supported MCP versions are `2025-11-25`, `2025-06-18`, and `2025-03-26`. Initialization negotiates the version; subsequent requests can include `MCP-Protocol-Version`. Requests must include both `application/json` and `text/event-stream` in `Accept`; the server returns JSON responses. `GET /mcp` and `DELETE /mcp` return 405 because the server provides neither an MCP SSE stream nor session state. Notifications receive 202. OAuth, the legacy SSE transport, deferred tasks, and MCP resources are not implemented.
 
-Pour une commande, fournir un `requestId` stable dans les arguments, ou l'en-tête HTTP `Idempotency-Key`. Une réponse `accepted` signifie que **le serveur OPC UA a acquitté l'écriture**. Vérifier les mesures pour constater son effet sur le procédé.
+For commands, supply a stable `requestId` argument or the HTTP `Idempotency-Key` header. An `accepted` response means **the OPC UA server acknowledged the write**. Read the measurements to verify its effect on the process.
 
-## OPC UA externe
+## External OPC UA server
 
-Désactiver le simulateur et configurer le serveur, les certificats, les variables et les commandes réelles. [Guide OPC UA](docs/opcua.md).
+Disable the simulator and configure the server, certificates, tags, and actual commands. See the [OPC UA guide](docs/opcua.md).
 
 ```bash
 export SCADA_SIMULATOR_ENABLED=false
-export SCADA_OPCUA_ENDPOINT=opc.tcp://serveur:4840/chemin
-# Définir SCADA_OPERATOR_TOKEN ou SCADA_READER_TOKEN par le gestionnaire de secrets.
-# Configurer la PKI et le catalogue dans application.conf.
+export SCADA_OPCUA_ENDPOINT=opc.tcp://your-server:4840/path
+# Set SCADA_OPERATOR_TOKEN or SCADA_READER_TOKEN through your secrets manager.
+# Configure the PKI and catalog in application.conf.
 ```
 
-Les jetons lecteur/opérateur sont des secrets de déploiement, jamais des valeurs à ajouter au dépôt. L'IHM peut ouvrir une session signée à partir d'un jeton ; la session expire après huit heures par défaut. En production, fournir `APPLICATION_SECRET`, activer `SESSION_SECURE=true` derrière HTTPS, et définir `play.filters.hosts.allowed` pour l'hôte réellement servi. L'authentification fournie peut être remplacée en liant une implémentation de `ScadaAccess` via Guice.
+Reader and operator tokens are deployment secrets and must remain outside source control. The HMI can exchange a token for a signed session, which expires after eight hours by default. In production, supply `APPLICATION_SECRET`, enable `SESSION_SECURE=true` behind HTTPS, and configure `play.filters.hosts.allowed` for the host being served. To replace the built-in authentication, bind a custom `ScadaAccess` implementation through Guice.
 
-## Assistant OpenAI optionnel
+## Optional OpenAI assistant
 
-Configurer **`OPENAI_API_KEY` et `OPENAI_MODEL`** côté serveur. L'assistant utilise l'API Responses et exécute ses appels d'outils dans le backend ; la clé n'est jamais envoyée au navigateur. Sans cette configuration, l'IHM, OPC UA, MCP et WebMCP fonctionnent normalement.
+Configure **`OPENAI_API_KEY` and `OPENAI_MODEL`** on the server. The assistant uses the Responses API and executes tool calls in the backend; the key is never sent to the browser. The HMI, OPC UA, MCP, and WebMCP work without this configuration.
 
-L'assistant de cette version est **en lecture seule** : les commandes restent accessibles via l'IHM et MCP avec les droits opérateur. Son catalogue d'outils et le contrôle d'exécution excluent les écritures. Les questions, définitions d'outils et résultats consultés sont transmis à OpenAI ; `store=false` est utilisé, sans prétendre désactiver toutes les règles de conservation du fournisseur. Le choix du modèle appartient au déploiement.
+The assistant in this version is **read-only**. Operators can still issue commands through the HMI and MCP. Both the assistant's tool catalog and its execution checks exclude writes. Questions, tool definitions, and retrieved results are sent to OpenAI. Requests use `store=false`, which does not disable all provider data-retention policies. Model selection is a deployment choice.
 
-## Vérifications
+## Verification
 
 ```bash
 sbt test
 npm ci
 npx playwright install chromium
-# Avec la démo déjà démarrée :
+# With the demo already running:
 npm run test:browser
 npm run test:mcp
 ```
 
-Les tests Java incluent des échanges OPC UA TCP réels, la reconnexion, le refus de certificats, les droits/limites de commandes, l'idempotence concurrente, le protocole MCP et une boucle d'outils OpenAI contre un fournisseur HTTP de test. Les cinq tests navigateur vérifient l'IHM sans API WebMCP, le client HTML minimal et le traitement d'une réponse d'écriture perdue. Le scénario WebMCP utilise une API injectée pour tester le contrat d'intégration. Le test MCP utilise le SDK client officiel.
+Java tests cover real OPC UA TCP exchanges, reconnection, certificate rejection, command permissions and limits, concurrent idempotency, the MCP protocol, and an OpenAI tool loop against a local HTTP test provider. The five browser tests cover the HMI without a WebMCP API, a minimal HTML client, and handling a lost write response. The WebMCP scenario uses an injected API to verify the integration contract. MCP tests use the official client SDK.
 
-L'appel à un vrai modèle OpenAI nécessite les secrets du déploiement ; les tests automatisés ne consomment pas de crédit OpenAI.
+Calling a real OpenAI model requires deployment credentials; automated tests do not consume OpenAI credits.
 
-## Périmètre de cette première version
+## Scope of this first version
 
-- Un endpoint OPC UA par runtime ; types de commande Boolean, Double, Float, Int32 et String. Le connecteur expose aussi le parcours des nœuds pour de futures fonctions d'intégration.
-- Catalogue de mesures et commandes configuré en HOCON. L'historisation, les alarmes OPC UA et la haute disponibilité ne sont pas implémentées.
-- Déduplication des commandes dans le processus, capacité de 4 096 identifiants et rétention minimale de 30 minutes. Elle ne survit pas à un redémarrage et ne constitue pas un journal d'audit durable. Les commandes acceptées sont journalisées côté serveur ; le journal de la page est une aide visuelle locale.
-- Validation des types, plages et droits côté serveur. Les interverrouillages physiques et séquences de sûreté restent dans l'automate ; aucun automate de sécurité n'est implémenté ici.
-- WebMCP dépend des capacités du navigateur/agent. L'IHM reste utilisable sans WebMCP et sans OpenAI.
+- One OPC UA endpoint per runtime. Supported command types are Boolean, Double, Float, Int32, and String. The connector also exposes node browsing for future integration features.
+- Tag and command catalogs are configured in HOCON. Historical storage, OPC UA alarms, and high availability are not implemented.
+- Command deduplication is in-memory, with capacity for 4,096 identifiers and a minimum retention period of 30 minutes. It does not survive a restart or provide a durable audit trail. Accepted commands are logged on the server; the page's command journal is a local visual aid.
+- The server validates types, ranges, and permissions. Physical interlocks and safety sequences remain in the PLC; this project does not implement a safety controller.
+- WebMCP availability depends on browser and agent capabilities. The HMI remains usable without WebMCP or OpenAI.
