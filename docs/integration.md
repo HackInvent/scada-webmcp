@@ -27,7 +27,7 @@ Then configure the OPC UA server, PKI, and `scada.tags` / `scada.commands` lists
 
 ## Routes and tool catalog
 
-Mount the `/api/scada/*` and `/mcp` routes shown in [`conf/routes`](../conf/routes). Browser mutations use an explicit CSRF action that requires a valid Play token even without a `Cookie` or `Authorization` header, including in the local demo. The client sends the token in `Csrf-Token` along with the session cookie. Keep Play's CSRF protections enabled. Your page controller can inject `io.hackinvent.scada.play.ScadaRuntime` and pass `runtime.browserTools()` to its view. Add `@AddCSRFToken` to the GET action.
+Mount the `/api/scada/*` and `/mcp` routes shown in [`conf/routes`](https://github.com/HackInvent/scada-webmcp/blob/main/conf/routes). Browser mutations use an explicit CSRF action that requires a valid Play token even without a `Cookie` or `Authorization` header, including in the local demo. The client sends the token in `Csrf-Token` along with the session cookie. Keep Play's CSRF protections enabled. Your page controller can inject `io.hackinvent.scada.play.ScadaRuntime` and pass `runtime.browserTools()` to its view. Add `@AddCSRFToken` to the GET action.
 
 Place the `+ nocsrf` modifier only before the `POST /mcp` route, as shown in the provided routes file. Remote MCP clients use Bearer authentication without a browser CSRF token. The MCP controller retains its origin and authentication checks. Do not apply this modifier to command, session, or assistant routes.
 

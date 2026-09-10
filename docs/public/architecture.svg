@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 420" role="img" aria-labelledby="title desc">
+<title id="title">One Java core, three integration paths</title>
+<desc id="desc">An OPC UA server connects to a shared Play Java core through Eclipse Milo. The core serves an HTML HMI with WebMCP, remote MCP clients, and an optional read-only OpenAI assistant.</desc>
+<defs><pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#dbe8e4"/></pattern></defs>
+<rect width="620" height="420" rx="24" fill="#f3f8f7"/><rect x="12" y="12" width="596" height="396" rx="18" fill="url(#grid)"/>
+<g fill="none" stroke="#72a99e" stroke-width="2"><path d="M169 210h61m178 0h26v-118h20m-46 118h46m-46 0h26v118h20"/><path d="m222 205 8 5-8 5m216-123 8 5-8 5m0 108 8 5-8 5m0 108 8 5-8 5"/></g>
+<g font-family="system-ui, sans-serif">
+<rect x="24" y="155" width="145" height="110" rx="12" fill="#fff" stroke="#c9ddd7"/>
+<text x="96" y="192" text-anchor="middle" font-size="12" fill="#617973">PROCESS DATA</text><text x="96" y="219" text-anchor="middle" font-size="19" font-weight="650" fill="#173d36">OPC UA</text><text x="96" y="242" text-anchor="middle" font-size="12" fill="#617973">Server / simulator</text>
+<rect x="230" y="126" width="178" height="168" rx="16" fill="#087f79"/>
+<text x="319" y="161" text-anchor="middle" font-size="11" letter-spacing="1" fill="#b5e8dc">SHARED JAVA CORE</text><text x="319" y="193" text-anchor="middle" font-size="24" font-weight="700" fill="#fff">Play SCADA</text><path d="M254 209h130" stroke="#60aca1"/><text x="319" y="233" text-anchor="middle" font-size="13" fill="#e1f4ee">Tags · Commands · Access</text><text x="319" y="258" text-anchor="middle" font-size="12" fill="#b5e8dc">Eclipse Milo connector</text>
+<g fill="#fff" stroke="#c9ddd7"><rect x="454" y="53" width="142" height="82" rx="12"/><rect x="454" y="169" width="142" height="82" rx="12"/><rect x="454" y="285" width="142" height="82" rx="12"/></g>
+<g text-anchor="middle"><text x="525" y="87" font-size="16" font-weight="650" fill="#173d36">HTML HMI</text><text x="525" y="110" font-size="12" fill="#617973">Twirl + WebMCP</text><text x="525" y="203" font-size="16" font-weight="650" fill="#173d36">MCP clients</text><text x="525" y="226" font-size="12" fill="#617973">Streamable HTTP</text><text x="525" y="319" font-size="16" font-weight="650" fill="#173d36">Assistant</text><text x="525" y="342" font-size="12" fill="#617973">Optional · Read-only</text></g>
+<text x="30" y="390" font-size="11" letter-spacing="1" fill="#617973">ONE CATALOG. CONSISTENT RULES. YOUR INTERFACE.</text>
+</g></svg>

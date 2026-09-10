@@ -13,3 +13,5 @@ data/
 test-results/
 playwright-report/
 RUNNING_PID
+docs/.vitepress/cache/
+docs/.vitepress/dist/

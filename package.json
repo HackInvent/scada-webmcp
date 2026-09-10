@@ -4,13 +4,22 @@
   "type": "module",
   "scripts": {
     "test:browser": "node --test tests/browser.mjs",
-    "test:mcp": "node --test tests/mcp-client.mjs"
+    "test:mcp": "node --test tests/mcp-client.mjs",
+    "docs:dev": "vitepress dev docs --host 127.0.0.1",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs --host 127.0.0.1"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
     "playwright": "1.63.0",
-    "@modelcontextprotocol/sdk": "1.30.0"
+    "vitepress": "1.6.4"
+  },
+  "overrides": {
+    "vitepress": {
+      "vite": "6.4.3"
+    }
   }
 }

@@ -1,5 +1,7 @@
 # Play SCADA + MCP + WebMCP
 
+[Documentation website](https://hackinvent.github.io/scada-webmcp/) · [Getting started](docs/getting-started.md) · [Architecture](docs/architecture.md)
+
 A reusable supervision core built with **Play Java 3.0.11 / Java 17+**, connected to OPC UA. A shared tag and command catalog powers HTML views, the MCP server, and each page's WebMCP tools.
 
 The browser integration uses [`HackInvent/play-webmcp` 0.5.0](https://github.com/HackInvent/play-webmcp), resolved from its Maven branch. The project depends on the published module rather than copying its source code.

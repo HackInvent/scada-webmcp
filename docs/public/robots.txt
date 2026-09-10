@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /scada-webmcp/
+Sitemap: https://hackinvent.github.io/scada-webmcp/sitemap.xml
